@@ -1,0 +1,31 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+spec:
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: nginx
+      annotations:
+        pod.beta.kubernetes.io/init-containers: '[{
+            "name": "init-myservice",
+            "image": "busybox",
+            "command": ["sh", "-c", "env;"],
+            "env": [
+               { "name": "KUBERNETES_POD_NAME",
+                 "valueFrom": { "fieldRef": { "apiVersion": "v1", "fieldPath": "metadata.name" } } },
+               { "name": "KUBERNETES_POD_NAMESPACE",
+                 "valueFrom": { "fieldRef": { "apiVersion": "v1", "fieldPath": "metadata.namespace" } } },
+               { "name": "KUBERNETES_POD_IP",
+                 "valueFrom": { "fieldRef": { "apiVersion": "v1", "fieldPath": "status.podIP" } } }
+            ]
+        }]'
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.7.9
+        ports:
+        - containerPort: 80
+        env: []
